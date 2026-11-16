@@ -33,12 +33,13 @@ class ChatViewModel(state: SavedStateHandle) : ViewModel() {
     }
 
     fun send(text: String) {
-        if (_loading.value == true) return
+        if (_loading.value == true || text.isBlank()) return
 
+        // 내 말풍선과 '작성 중' 말풍선은 항상 연속된 id (retry에서 함께 지우기 위해)
         val userMsg = ChatMessage(nextId++, text, isUser = true)
         val waitingMsg = ChatMessage(
             nextId++,
-            if (mode == ChatMode.AGENT) "확인하고 있어요…" else "답변 작성 중…",
+            if (mode == ChatMode.AGENT) "확인하고 있어요" else "답변 작성 중",
             isUser = false,
             isLoading = true
         )
@@ -59,11 +60,20 @@ class ChatViewModel(state: SavedStateHandle) : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                waitingMsg.copy(text = e.toUserMessage(), isLoading = false)
+                // 실패한 말풍선에는 '다시 시도'용으로 원래 질문을 담아 둔다
+                waitingMsg.copy(text = e.toUserMessage(), isLoading = false, retryText = text)
             }
             replace(waitingMsg.id, reply)
             _loading.value = false
         }
+    }
+
+    /** 실패한 말풍선의 '다시 시도' 버튼: 실패한 질문과 오류 말풍선을 지우고 같은 질문을 다시 보낸다. */
+    fun retry(failed: ChatMessage) {
+        val text = failed.retryText ?: return
+        if (_loading.value == true) return
+        _messages.value = _messages.value.orEmpty().filterNot { it.id == failed.id || it.id == failed.id - 1 }
+        send(text)
     }
 
     /** 확인 창의 승인/거절 버튼에서 호출. 결정은 항상 사람이 한다. */
@@ -75,6 +85,7 @@ class ChatViewModel(state: SavedStateHandle) : ViewModel() {
             val text = try {
                 ApiClient.api.decide(action.id, DecisionRequest(approve)).message
             } catch (e: Exception) {
+                refreshPending()   // 실패하면 서버 기준으로 대기 목록 복원 → 확인 창이 다시 뜸
                 "처리하지 못했어요: ${e.toUserMessage()}"
             }
             addNotice(text)

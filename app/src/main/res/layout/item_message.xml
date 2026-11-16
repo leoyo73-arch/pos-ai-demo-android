@@ -10,16 +10,32 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tvBubble"
+        <!-- 말풍선 + '작성 중' 표시 -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:lineSpacingExtra="3dp"
-            android:maxWidth="280dp"
-            android:paddingHorizontal="14dp"
-            android:paddingVertical="10dp"
-            android:textIsSelectable="true"
-            android:textSize="15sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvBubble"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="3dp"
+                android:maxWidth="270dp"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="10dp"
+                android:textIsSelectable="true"
+                android:textSize="15sp" />
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginStart="8dp"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvSources"
@@ -31,6 +47,15 @@
             android:maxWidth="270dp"
             android:textColor="@color/sources_text"
             android:textSize="12sp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btnRetry"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="36dp"
+            android:text="@string/retry"
             android:visibility="gone" />
     </LinearLayout>
 </FrameLayout>

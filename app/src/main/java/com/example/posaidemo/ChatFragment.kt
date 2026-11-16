@@ -1,16 +1,22 @@
 package com.example.posaidemo
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.posaidemo.databinding.FragmentChatBinding
+import com.google.android.material.chip.Chip
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -20,7 +26,7 @@ class ChatFragment : Fragment() {
     private var _binding: FragmentChatBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ChatViewModel by viewModels()
-    private val adapter = ChatAdapter()
+    private val adapter = ChatAdapter(onRetry = { viewModel.retry(it) })
     private var approvalDialog: AlertDialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -33,6 +39,14 @@ class ChatFragment : Fragment() {
         binding.rvMessages.layoutManager = LinearLayoutManager(requireContext()).apply { stackFromEnd = true }
         binding.rvMessages.adapter = adapter
 
+        // 예시 질문 칩: 누르면 바로 전송
+        viewModel.mode.examples.forEach { example ->
+            binding.chipExamples.addView(Chip(requireContext()).apply {
+                text = example
+                setOnClickListener { viewModel.send(example) }
+            })
+        }
+
         binding.btnSend.setOnClickListener { sendMessage() }
         binding.etMessage.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEND) {
@@ -40,14 +54,25 @@ class ChatFragment : Fragment() {
                 true
             } else false
         }
+        binding.etMessage.doAfterTextChanged { updateSendButton() }
 
         viewModel.messages.observe(viewLifecycleOwner) { list ->
+            binding.chipExamples.isVisible = list.none { it.isUser }   // 첫 질문을 보내면 칩 숨김
             adapter.submitList(list) { binding.rvMessages.scrollToPosition(list.size - 1) }
         }
-        viewModel.loading.observe(viewLifecycleOwner) { binding.btnSend.isEnabled = !it }
-        viewModel.pending.observe(viewLifecycleOwner) { list ->
-            if (approvalDialog?.isShowing != true) list.firstOrNull()?.let(::showApproval)
+        viewModel.loading.observe(viewLifecycleOwner) { updateSendButton() }
+        if (viewModel.mode == ChatMode.AGENT) {   // 승인 대기는 비서 탭에만 있음 (상담 탭이 배지를 0으로 덮어쓰지 않게)
+            viewModel.pending.observe(viewLifecycleOwner) { list ->
+                (activity as? MainActivity)?.updateAgentBadge(list.size)
+                if (approvalDialog?.isShowing != true) list.firstOrNull()?.let(::showApproval)
+            }
         }
+    }
+
+    /** 입력이 비어 있거나 응답을 기다리는 중이면 보내기 버튼을 끈다. */
+    private fun updateSendButton() {
+        val hasText = !binding.etMessage.text.isNullOrBlank()
+        binding.btnSend.isEnabled = hasText && viewModel.loading.value != true
     }
 
     /** 승인 확인 창: 무엇을 승인하는지 거래 정보를 모두 보여 주고, 사장님이 직접 결정한다. */
@@ -62,7 +87,7 @@ class ChatFragment : Fragment() {
             append(if (action.isCancel) "사유: " else "보낼 문구:\n")
             append(action.detail.orEmpty())
         }
-        approvalDialog = AlertDialog.Builder(requireContext())
+        approvalDialog = MaterialAlertDialogBuilder(requireContext())
             .setTitle(if (action.isCancel) R.string.approve_cancel_title else R.string.approve_notice_title)
             .setMessage(message)
             .setCancelable(false)                       // 반드시 승인 또는 거절을 고르게
@@ -74,6 +99,13 @@ class ChatFragment : Fragment() {
                 viewModel.pending.value?.firstOrNull()?.let(::showApproval)
             }
             .show()
+            .also { dialog ->
+                // 결제 취소는 되돌릴 수 없는 작업이라 승인 버튼을 빨간색으로
+                if (action.isCancel) {
+                    dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+                        .setTextColor(ContextCompat.getColor(requireContext(), R.color.danger))
+                }
+            }
     }
 
     private fun sendMessage() {

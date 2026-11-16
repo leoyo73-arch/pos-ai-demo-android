@@ -8,4 +8,5 @@
     <string name="approve_notice_title">손님 안내를 보낼까요?</string>
     <string name="approve">승인</string>
     <string name="reject">거절</string>
+    <string name="retry">다시 시도</string>
 </resources>

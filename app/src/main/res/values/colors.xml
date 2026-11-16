@@ -8,4 +8,5 @@
     <color name="bubble_ai_text">#14213D</color>
     <color name="sources_text">#6A7383</color>
     <color name="notice_text">#6A7383</color>
+    <color name="danger">#C62828</color>
 </resources>

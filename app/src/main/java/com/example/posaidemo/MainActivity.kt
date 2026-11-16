@@ -2,6 +2,7 @@ package com.example.posaidemo
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.posaidemo.databinding.ActivityMainBinding
@@ -27,5 +28,18 @@ class MainActivity : AppCompatActivity() {
         TabLayoutMediator(binding.tabs, binding.pager) { tab, position ->
             tab.text = getString(if (tabs[position] == ChatMode.CONSULT) R.string.tab_consult else R.string.tab_agent)
         }.attach()
+    }
+
+    /** 비서 탭에 승인 대기 건수 배지를 표시. 상담 탭에 있어도 승인할 일이 있다는 걸 알 수 있다. */
+    fun updateAgentBadge(count: Int) {
+        val tab = binding.tabs.getTabAt(tabs.indexOf(ChatMode.AGENT)) ?: return
+        if (count > 0) {
+            tab.orCreateBadge.apply {
+                number = count
+                backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.danger)
+            }
+        } else {
+            tab.removeBadge()
+        }
     }
 }

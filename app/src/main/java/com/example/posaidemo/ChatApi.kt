@@ -12,6 +12,9 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 // ── 상담(RAG) ───────────────────────────────────────
@@ -78,14 +81,17 @@ object ApiClient {
         .create(ChatApi::class.java)
 }
 
-/** 서버가 보낸 {"detail": "..."} 오류 문구를 꺼내 사용자에게 보여 줄 문장으로 만든다. */
-fun Throwable.toUserMessage(): String {
-    if (this is HttpException) {
-        val detail = runCatching {
-            Gson().fromJson(response()?.errorBody()?.string(), JsonObject::class.java)
-                ?.get("detail")?.asString
-        }.getOrNull()
-        return detail ?: "서버 오류가 발생했어요. (HTTP ${code()})"
-    }
-    return "서버에 연결하지 못했어요. 서버가 켜져 있는지 확인해 주세요.\n($message)"
+/** 오류를 원인별로 나눠 사용자에게 보여 줄 문장으로 만든다. */
+fun Throwable.toUserMessage(): String = when (this) {
+    is HttpException -> serverDetail() ?: "서버 오류가 발생했어요. (HTTP ${code()})"
+    is SocketTimeoutException -> "응답이 늦어지고 있어요. 잠시 후 다시 시도해 주세요."
+    is ConnectException, is UnknownHostException ->
+        "서버에 연결할 수 없어요. 서버가 켜져 있고 같은 Wi-Fi에 연결돼 있는지 확인해 주세요."
+    else -> "문제가 발생했어요. (${javaClass.simpleName})"
 }
+
+/** 서버가 보낸 {"detail": "..."} 문구 (예: 오늘 AI 사용량을 모두 썼어요) */
+private fun HttpException.serverDetail(): String? = runCatching {
+    Gson().fromJson(response()?.errorBody()?.string(), JsonObject::class.java)
+        ?.get("detail")?.asString
+}.getOrNull()
