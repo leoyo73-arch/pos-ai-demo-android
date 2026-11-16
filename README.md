@@ -1,54 +1,39 @@
 # POS AI 데모 (PosAiDemo)
 
-Android 채팅 화면에서 질문을 보내면 FastAPI 서버가 Gemini로 답변을 만들어 돌려주는 1주차 결과물입니다.
+소상공인 POS 앱에 AI 상담과 업무 비서를 붙인 포트폴리오 프로젝트입니다. 모든 매뉴얼과 매출 데이터는 가상입니다.
 
-## 폴더 구성
+## 구성
 
 ```
 PosAiDemo/
-├─ app/       Android 앱 (Kotlin, MVVM, Retrofit, RecyclerView 채팅 화면)
-└─ server/    Python 서버 (FastAPI + Gemini)
-   ├─ main.py          /chat API (재시도·예비 모델·타임아웃 포함)
-   ├─ list_models.py   사용 가능한 모델 이름 확인
-   ├─ requirements.txt
-   └─ .env.example     .env 작성 예시
+├─ app/       Android 앱 (Kotlin, MVVM, Retrofit) — 상담 탭 / 비서 탭
+└─ server/    Python 서버 (FastAPI, Gemini, Chroma, LangGraph)
 ```
 
-## 1. 서버 실행
+| 탭 | 하는 일 | 서버 API |
+|---|---|---|
+| 상담 | 가상 매뉴얼 근거로 답변(RAG), 참고한 매뉴얼 표시 | `POST /chat` |
+| 비서 | 매출·거래 조회, 결제 취소·손님 안내 요청(에이전트) | `POST /agent` |
+| 승인 | 취소·안내는 확인 창에서 사장님이 승인해야 실행 | `GET /actions`, `POST /actions/{id}` |
+
+## 서버 실행
 
 ```
 cd server
-py -3.13 -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-`.env.example`을 복사해 `.env`로 이름을 바꾸고 API 키를 넣은 뒤, 모델 이름을 확인합니다.
-
-```
-python list_models.py
-```
-
-`.env`의 `GEMINI_MODEL`, `GEMINI_FALLBACK_MODEL`을 채우고 서버를 켭니다.
-
-```
+python ingest.py            # 매뉴얼 → Chroma
+python make_sales_data.py   # 가상 매출 DB
 fastapi dev main.py
 ```
 
-브라우저에서 http://127.0.0.1:8000/docs 를 열어 `/chat`이 동작하는지 먼저 확인하세요.
+`main.py`에 비서 API를 연결하는 두 줄이 있어야 합니다.
 
-## 2. 앱 실행
+```python
+from agent_api import router as agent_router
+app.include_router(agent_router)
+```
 
-1. Android Studio에서 **File → Open**으로 `PosAiDemo` 폴더를 엽니다.
-2. Gradle Sync가 끝나면 에뮬레이터에서 실행합니다.
-3. 질문을 입력하고 **보내기**를 누르면 서버 답변이 표시됩니다.
+## 앱 실행
 
-## 실제 폰으로 테스트할 때
-
-1. 서버를 `fastapi dev main.py --host 0.0.0.0`으로 실행합니다.
-2. `app/build.gradle.kts`의 `SERVER_URL`을 PC IP로 바꿉니다. (예: `http://192.168.0.10:8000/`)
-3. PC와 폰이 같은 Wi-Fi에 있어야 하고, Windows 방화벽이 8000 포트를 허용해야 합니다.
-
-## 요청·응답 확인
-
-Logcat에서 `okhttp`로 검색하면 주고받은 JSON을 볼 수 있습니다.
+Android Studio에서 `PosAiDemo` 폴더를 열고 에뮬레이터에서 실행합니다. 실제 폰은 `app/build.gradle.kts`의 `SERVER_URL`을 PC IP로 바꾸고 서버를 `--host 0.0.0.0`으로 실행합니다.

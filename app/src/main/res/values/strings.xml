@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">POS AI 데모</string>
-    <string name="hint_message">질문을 입력하세요</string>
     <string name="btn_send">보내기</string>
+    <string name="tab_consult">상담</string>
+    <string name="tab_agent">비서</string>
+    <string name="sources_title">참고한 매뉴얼</string>
+    <string name="approve_cancel_title">결제 취소를 승인할까요?</string>
+    <string name="approve_notice_title">손님 안내를 보낼까요?</string>
+    <string name="approve">승인</string>
+    <string name="reject">거절</string>
 </resources>

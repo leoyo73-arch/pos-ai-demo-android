@@ -16,7 +16,7 @@ android {
 
         // 서버 주소. 에뮬레이터는 10.0.2.2가 PC의 localhost입니다.
         // 실제 폰으로 테스트할 때는 PC의 IP(예: "http://192.168.0.10:8000/")로 바꾸세요.
-        buildConfigField("String", "SERVER_URL", "\"http://10.101.225.77:8000/\"")
+        buildConfigField("String", "SERVER_URL", "\"http://10.101.225.31:8000/\"")
     }
 
     buildFeatures {
@@ -46,6 +46,8 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.fragment:fragment-ktx:1.8.5")       // 탭마다 Fragment + by viewModels()
+    implementation("androidx.viewpager2:viewpager2:1.1.0")       // 상담 / 비서 탭 전환
 
     // MVVM
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")
