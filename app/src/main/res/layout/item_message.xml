@@ -1,0 +1,35 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="4dp">
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvBubble"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lineSpacingExtra="3dp"
+            android:maxWidth="280dp"
+            android:paddingHorizontal="14dp"
+            android:paddingVertical="10dp"
+            android:textIsSelectable="true"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvSources"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="4dp"
+            android:lineSpacingExtra="2dp"
+            android:maxWidth="270dp"
+            android:textColor="@color/sources_text"
+            android:textSize="12sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</FrameLayout>

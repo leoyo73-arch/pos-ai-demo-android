@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">POS AI 데모</string>
+    <string name="hint_message">질문을 입력하세요</string>
+    <string name="btn_send">보내기</string>
+</resources>
