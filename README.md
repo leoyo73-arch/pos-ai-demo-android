@@ -1,5 +1,10 @@
 # POS AI 데모 — Android 앱
 
+## 시연 영상 (1분 55초)
+https://github.com/user-attachments/assets/bac0c43c-28f7-4f70-9936-cc70e0145646
+
+
+
 소상공인 POS 앱에 **AI 상담(RAG)**과 **업무 비서(에이전트)**를 붙인 포트폴리오 프로젝트의 Android 앱입니다.
 서버 구조, 설계 이유, 측정 결과는 [pos-ai-server](https://github.com/leoyo73-arch/pos-ai-server)에 정리했습니다.
 
