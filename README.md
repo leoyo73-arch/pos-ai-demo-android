@@ -1,7 +1,8 @@
 # POS AI 데모 — Android 앱
 
 ## 시연 영상 (1분 55초)
-https://github.com/user-attachments/assets/bac0c43c-28f7-4f70-9936-cc70e0145646
+https://github.com/user-attachments/assets/851f755e-c259-4d53-9a64-e7c931549e3d
+
 
 
 
