@@ -92,7 +92,7 @@ class ChatViewModel(state: SavedStateHandle) : ViewModel() {
         }
     }
 
-    private fun refreshPending() {
+    fun refreshPending() {
         viewModelScope.launch {
             runCatching { ApiClient.api.actions() }
                 .onSuccess { _pending.value = it }

@@ -115,6 +115,13 @@ class ChatFragment : Fragment() {
         binding.etMessage.text.clear()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // 비서 탭으로 오거나 앱으로 돌아올 때마다 승인 대기를 다시 가져옴
+        // (Claude 데스크톱 같은 앱 밖에서 생긴 요청도 바로 보이게)
+        if (viewModel.mode == ChatMode.AGENT) viewModel.refreshPending()
+    }
+
     override fun onDestroyView() {
         // 화면 회전 시 창이 새는 것 방지 (대기 목록은 ViewModel에 남아 있어 화면이 다시 만들어지면 다시 뜸)
         approvalDialog?.setOnDismissListener(null)
